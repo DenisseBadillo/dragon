@@ -1,0 +1,76 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class Dragon : MonoBehaviour {
+    public float maxVel = 5f;
+    public float yjumpForce = 80f;
+
+    private Rigidbody2D rb;
+    private Animator anim;
+    private LevelManager levelManager;
+    private Vector2 jumpForce;
+    private bool movingRight = false;
+    private bool isJumping = false;
+
+    // Use this for initialization
+    void Start() {
+        rb = GetComponent<Rigidbody2D>();
+        anim = GetComponent<Animator>();
+        levelManager = FindObjectOfType<LevelManager>();
+        jumpForce = new Vector2(0f, 0f);
+    }
+
+    // Update is called once per frame
+    void FixedUpdate() {
+        // You use this line to know how much force is being applied to
+        // our main character in the horizontal axis.
+        float V = Input.GetAxis("Horizontal");
+
+        Vector2 vel = new Vector2(0, rb.velocity.y);
+        V *= maxVel; // <--- Prorratea velocidad del personaje
+
+        vel.x = V;
+        rb.velocity = vel;
+
+        if (V != 0f) {
+            anim.SetBool("isWalking", true);
+        } else {
+            anim.SetBool("isWalking", false);
+        }
+        if (V < 0f && movingRight) {
+            Flip();
+            movingRight = false;
+        } else if (V > 0f && !movingRight) {
+            Flip();
+            movingRight = true;
+        }
+
+        {
+            if (Input.GetAxis("Jump") > 0.01f)
+            {
+                if (!isJumping)
+                {
+                    if (rb.velocity.y == 0f)
+                    {
+                        isJumping = true;
+                        jumpForce.x = 0f;
+                        jumpForce.y = yjumpForce;
+                        rb.AddForce(jumpForce);
+
+                    }
+
+                }
+            }
+            else
+               isJumping = false;
+            
+        }
+    }
+    void Flip()
+    {
+        var s = transform.localScale;
+        s.x *= -1;
+        transform.localScale = s;
+    }
+    }
